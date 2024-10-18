@@ -12,5 +12,18 @@ const createMessageInDb= async (body, userId, lobbyId) => {
     }
 };
 
+const extractMessagesFromDb = async (lobbyId) => {
+    const queryShowMessages = `SELECT  user.name, message.create_at, message.body FROM message JOIN user ON message.user_id = user.user_id where lobby_id = ? ORDER BY create_at`;
 
-export {createMessageInDb}
+
+    try {
+        const [result] = await connection.query(queryShowMessages, [lobbyId]);
+        return result;
+    }
+    catch (error) {
+        throw new Error('Error creating lobby: ' + error.message);
+    }
+
+}
+
+export {createMessageInDb, extractMessagesFromDb}
