@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import connection from "../Config/dbConfig.mjs";
 import {createUser} from "../Models/usersModel.js";
-import {generateToken, verifyToken} from "../Middleware/middleware.js";
+import jwt from "jsonwebtoken";
 
 
 const signUp = async (req, res) => {
@@ -28,7 +28,7 @@ const login = async (req, res) => {
         return res.status(400).send({message: 'Email and password are required'});
     }
     try {
-        const loginQuery = `SELECT email, password FROM user WHERE email= ?`;
+        const loginQuery = `SELECT user_id ,email, password FROM user WHERE email= ?`;
         const [result] = await connection.query(loginQuery, [email])
         if (!result) {
             return res.status(401).send({message: 'User not found'});
@@ -40,11 +40,9 @@ const login = async (req, res) => {
         if (!correctPassword) {
             return res.status(401).send({message: 'Wrong password'});
         }
-        const token = generateToken(userInfos);
+        const token = jwt.sign({id : userInfos.user_id, email: userInfos.email}, process.env.JWT_TOKEN, {expiresIn: '1d'});
+
         return res.status(200).send({info: 'Successfully logged in', token, message :'Your token will expire in 1 hour.'});
-
-
-
 
     } catch {
         return res.status(401).send({message: 'Error during login', });
