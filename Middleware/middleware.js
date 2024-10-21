@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { getAllEmails } from "../Models/usersModel.js";
 import { getUsersAndAdminsMessagesInDB } from "../Models/messageModel.js";
-import { getAllLobbiesIdInDB } from "../Models/lobbyModel.js";
+import { getLobbyInDB, getUsersInLobby } from "../Models/lobbyModel.js";
 
 const verifyToken = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
@@ -36,21 +36,20 @@ const verifyEmail = async (req, res, next) => {
 };
 
 const verifyLobbyExist = async (req, res, next) => {
-  const { lobby_id } = req.body;
-
-  const lobbies = await getAllLobbiesIdInDB();
-  
+  const lobby_id = req.body.lobby_id || req.params.lobby_id;
+  console.log(lobby_id);
+  const lobbies = await getLobbyInDB(lobby_id);
+  console.log(lobbies);
   const found = lobbies.some((lobby) => {
-    
-   return lobby.lobby_id === lobby_id;
-
+    console.log(lobby.lobby_id);
+    return lobby.lobby_id == lobby_id;
   });
-
+  console.log(found);
   if (found) {
     return next();
   }
 
-  res.status(401).send({ message: "The lobby does not exit, create one" });
+  res.status(401).send({ message: "The lobby does not exist, create one" });
 };
 
 const verifyUserAdminMessage = async (req, res, next) => {
@@ -79,6 +78,26 @@ const verifyUserAdminMessage = async (req, res, next) => {
   }
 };
 
+const verifyIfUserIsInLobby = async (req, res, next) => {
+  const lobby_id = req.params;
+  const user_id = req.user_id;
+
+  try {
+    const users = await getUsersInLobby(lobby_id);
+    if (!users)
+      return res.status(400).json({ message: "No users in this lobby" });
+
+    const foundUser = users.some((user) => {
+      return user.user_id === user_id;
+    });
+
+    if (foundUser) {
+      return next();
+    }
+  } catch (error) {
+    res.status(400).json({ message: "You are not in this lobby" });
+  }
+};
 //     const authHeader = req.header('authorization');
 //
 //     if(!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -108,4 +127,10 @@ const verifyUserAdminMessage = async (req, res, next) => {
 //
 // }
 
-export { verifyToken, verifyEmail, verifyLobbyExist, verifyUserAdminMessage };
+export {
+  verifyToken,
+  verifyEmail,
+  verifyLobbyExist,
+  verifyUserAdminMessage,
+  verifyIfUserIsInLobby,
+};

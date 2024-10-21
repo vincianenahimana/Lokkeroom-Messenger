@@ -11,6 +11,7 @@ import {
   verifyEmail,
   verifyLobbyExist,
   verifyUserAdminMessage,
+  verifyIfUserIsInLobby,
 } from "../Middleware/middleware.js";
 import { showMessagesInLobby } from "../Controllers/lobbyController.mjs";
 
@@ -30,10 +31,16 @@ router.post("/lobby", verifyToken, verifyLobbyExist, async (req, res) => {
   await createMessage(req, res);
 });
 
-router.get("/lobby/:lobby_id/", verifyToken, async (req, res) => {
-  req.body.user_id = req.user.id;
-  await showMessagesInLobby(req, res);
-});
+router.get(
+  "/lobby/:lobby_id/",
+  verifyToken,
+  verifyLobbyExist,
+  verifyIfUserIsInLobby,
+  async (req, res) => {
+    req.body.user_id = req.user.id;
+    await showMessagesInLobby(req, res);
+  }
+);
 
 router.patch(
   "/lobby/:message_id",

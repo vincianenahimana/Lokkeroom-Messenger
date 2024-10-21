@@ -11,14 +11,36 @@ const createLobbyInDB = async (name, adminId) => {
   }
 };
 
-const getAllLobbiesIdInDB = async () => {
-  const querygetLobbyId = `SELECT lobby_id FROM lobby`;
+const getLobbyInDB = async (lobby_id) => {
+  const querygetLobbyId = `SELECT lobby_id FROM lobby WHERE lobby_id=?`;
   try {
-    const [result] = await connection.query(querygetLobbyId);
+    const [result] = await connection.query(querygetLobbyId, lobby_id);
     return result;
   } catch (error) {
     throw new Error("Error getting lobbies" + error.message);
   }
 };
 
-export { createLobbyInDB, getAllLobbiesIdInDB };
+const joinLobbyInDB = async (lobby_id) => {
+  const querygetLobbyId = `SELECT lobby_id FROM lobby WHERE lobby_id=?`;
+  try {
+    const [result] = await connection.query(querygetLobbyId, lobby_id);
+    return result;
+  } catch (error) {
+    throw new Error("Error joining lobby" + error.message);
+  }
+};
+
+const getUsersInLobby = async (lobby_id) => {
+  const querygetUsersInLobby = `SELECT user_id FROM lobby WHERE lobby_id=?`;
+  try {
+    const [result] = await connection.query(querygetUsersInLobby, lobby_id);
+    return result;
+  } catch (error) {
+    throw new Error("Can't show users in Lobby");
+  }
+};
+
+
+
+export { createLobbyInDB, getLobbyInDB, joinLobbyInDB, getUsersInLobby};

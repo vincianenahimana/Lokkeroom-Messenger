@@ -5,7 +5,7 @@ import {
 } from "../Models/messageModel.js";
 
 const createMessage = async (req, res) => {
-  const { body, lobby_id } = req.body;
+  const { body, lobby_id } = req.body ;
 
   const user_id = req.user.id;
 
