@@ -3,9 +3,10 @@ import {
   createMessage,
   editMessage,
   deleteMessage,
+  getMessageInLobby,
 } from "../Controllers/messageController.mjs";
 import express from "express";
-import { createLobby } from "../Controllers/lobbyController.mjs";
+import { createLobby, joinLobby } from "../Controllers/lobbyController.mjs";
 import {
   verifyToken,
   verifyEmail,
@@ -13,7 +14,10 @@ import {
   verifyUserAdminMessage,
   verifyIfUserIsInLobby,
 } from "../Middleware/middleware.js";
-import { showMessagesInLobby } from "../Controllers/lobbyController.mjs";
+import {
+  showMessagesInLobby,
+  showUsersInLoby,
+} from "../Controllers/lobbyController.mjs";
 
 const router = express.Router();
 
@@ -26,10 +30,16 @@ router.post("/createLobby", verifyToken, async (req, res) => {
   await createLobby(req, res);
 });
 
-router.post("/lobby", verifyToken, verifyLobbyExist, async (req, res) => {
-  req.body.user_id = req.user.id;
-  await createMessage(req, res);
-});
+router.post(
+  "/lobby",
+  verifyToken,
+  verifyLobbyExist,
+  verifyIfUserIsInLobby,
+  async (req, res) => {
+    req.body.user_id = req.user.id;
+    await createMessage(req, res);
+  }
+);
 
 router.get(
   "/lobby/:lobby_id/",
@@ -61,4 +71,27 @@ router.delete(
     await deleteMessage(req, res);
   }
 );
+
+router.post(
+  "/join/:lobby_id",
+  verifyToken,
+  verifyLobbyExist,
+  async (req, res) => {
+    await joinLobby(req, res);
+  }
+);
+
+router.get(
+  "/:lobby_id/:message_id",
+  verifyToken,
+  verifyLobbyExist,
+  verifyIfUserIsInLobby,
+  async (req, res) => {
+    await getMessageInLobby(req, res);
+  }
+);
+
+router.get("/users", verifyToken, async (req, res) => {
+  await showUsersInLoby(req, res);
+});
 export default router;

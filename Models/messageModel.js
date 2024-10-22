@@ -19,7 +19,7 @@ const extractMessagesFromDb = async (lobbyId) => {
     const [result] = await connection.query(queryShowMessages, [lobbyId]);
     return result;
   } catch (error) {
-    throw new Error("Error creating lobby: " + error.message);
+    throw new Error("Error getting messages from the lobby: " + error.message);
   }
 };
 
@@ -32,16 +32,6 @@ const getUsersAndAdminsMessagesInDB = async (messageId) => {
     throw new Error(`Error extract messages's users`);
   }
 };
-
-// const extractMessage = async (message_id) => {
-//   const queryShowMessage = `SELECT body FROM message WHERE message_id=?`;
-//   try {
-//     const message = await connection.query(queryShowMessage, [message_id]);
-//     return message;
-//   } catch (error) {
-//     throw new Error(`Error getting messages`);
-//   }
-// };
 
 const updateMessageInDB = async (body, message_id) => {
   const queryEditMessage = `UPDATE message SET body = ? WHERE message_id=?`;
@@ -68,10 +58,21 @@ const deleteMessageInDB = async (message_id) => {
   }
 };
 
+const getMessageInDB = async (lobby_id,message_id) =>{
+  const queryGetMessage = `SELECT * FROM message WHERE lobby_id=? AND message_id=?`
+  try {
+    const [message] = await connection.query(queryGetMessage,[lobby_id,message_id])
+    return message
+  } catch (error) {
+    throw new Error (`Error getting message`+ error.message)
+  }
+}
+
 export {
   createMessageInDb,
   extractMessagesFromDb,
   getUsersAndAdminsMessagesInDB,
   updateMessageInDB,
   deleteMessageInDB,
+  getMessageInDB
 };

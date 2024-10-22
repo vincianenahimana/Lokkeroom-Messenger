@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
     if (err) return res.status(401).send({ message: "Invalid Token" });
 
     req.user = user;
-    console.log("User from token: ", req.user);
+
     next();
   });
 };
@@ -37,14 +37,13 @@ const verifyEmail = async (req, res, next) => {
 
 const verifyLobbyExist = async (req, res, next) => {
   const lobby_id = req.body.lobby_id || req.params.lobby_id;
-  console.log(lobby_id);
+
   const lobbies = await getLobbyInDB(lobby_id);
-  console.log(lobbies);
+
   const found = lobbies.some((lobby) => {
-    console.log(lobby.lobby_id);
     return lobby.lobby_id == lobby_id;
   });
-  console.log(found);
+
   if (found) {
     return next();
   }
@@ -79,18 +78,18 @@ const verifyUserAdminMessage = async (req, res, next) => {
 };
 
 const verifyIfUserIsInLobby = async (req, res, next) => {
-  const lobby_id = req.params;
-  const user_id = req.user_id;
+  const lobby_id = parseInt(req.params.lobby_id);
 
+  const user_id = req.user.id;
   try {
     const users = await getUsersInLobby(lobby_id);
+
     if (!users)
       return res.status(400).json({ message: "No users in this lobby" });
 
     const foundUser = users.some((user) => {
       return user.user_id === user_id;
     });
-
     if (foundUser) {
       return next();
     }
@@ -98,34 +97,6 @@ const verifyIfUserIsInLobby = async (req, res, next) => {
     res.status(400).json({ message: "You are not in this lobby" });
   }
 };
-//     const authHeader = req.header('authorization');
-//
-//     if(!authHeader || !authHeader.startsWith('Bearer ')) {
-//         return res
-//             .status(401)
-//             .json({ error: 'Incorrect Token' });
-//     }
-//     const token = authHeader.replace('Bearer ', '');
-//
-//     if(!token) {
-//         return res
-//             .status(401)
-//             .json({ error: 'No Token Provided' });
-//     }
-//
-//     try {
-//         jwt.verify(token, process.env.JWT_TOKEN, (err, user) => {
-//             if (err) return res.status(401).send({message: 'Invalid Token'});
-//             req.user = user;
-//             next();
-//         })
-//
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(401).json({ error : "Incorrect Token" });
-//     }
-//
-// }
 
 export {
   verifyToken,

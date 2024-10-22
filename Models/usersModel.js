@@ -37,4 +37,7 @@ const getAllUsers = async () => {
     throw new Error("Error during get All users");
   }
 };
+
+
+
 export { createUser, getUserByEmail, getAllEmails, getAllUsers };
